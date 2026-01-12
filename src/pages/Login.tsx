@@ -1,7 +1,8 @@
 import { useContext, useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
-import { AuthContext } from "../context/userContext";
+import { AuthContext, type AuthContextType } from "../context/userContext";
 import createSha from "../utils/sha256";
+import type { SignIn, User } from "../types";
 
 interface FormInput {
   name?: string;
@@ -12,9 +13,9 @@ interface FormInput {
 
 function Login() {
   const [auth, setAuth] = useState<"login" | "signin">("login");
-  const { user, signIn, login } = useContext(AuthContext);
+  const { signIn, login } = useContext(AuthContext) as AuthContextType;
   const { register, handleSubmit, reset } = useForm<FormInput>();
-  const onSubmit: SubmitHandler<FormInput> = async (data) => {
+  const onSubmit: SubmitHandler<FormInput> = async (data: SignIn) => {
     if (auth === "signin") {
       if (data.password === data.passwordCheck) {
         const sha256 = await createSha(data.password);
@@ -31,32 +32,32 @@ function Login() {
 
   return (
     <>
-      <button
-        onClick={() => {
-          setAuth(auth === "login" ? "signin" : "login");
-        }}
-      >
-        {auth === "login" ? "SignIn" : "Login"}
-      </button>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="flex flex-col gap-2 text-black">
+        <div className="flex flex-col gap-2">
           {auth === "signin" && (
             <>
               <label>Nome:</label>
-              <input className="bg-white" {...register("name")}></input>
+              <input {...register("name")} required></input>
             </>
           )}
           <label>Email:</label>
-          <input className="bg-white" type="email" {...register("email")}></input>
+          <input type="email" {...register("email")} required></input>
           <label>Senha:</label>
-          <input className="bg-white" type="password" {...register("password")}></input>
+          <input type="password" {...register("password")} required></input>
           {auth === "signin" && (
             <>
               <label>Confirmar senha Senha:</label>
-              <input className="bg-white" type="password" {...register("passwordCheck")}></input>
+              <input type="password" {...register("passwordCheck")} required></input>
             </>
           )}
           <button type="submit">{auth === "signin" ? "Cadastrar" : "Logar"}</button>
+          <button
+            onClick={() => {
+              setAuth(auth === "login" ? "signin" : "login");
+            }}
+          >
+            {auth === "login" ? "SignIn" : "Login"}
+          </button>
         </div>
       </form>
     </>
